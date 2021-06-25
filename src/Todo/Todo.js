@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react';
 
 class Todo extends Component {
@@ -5,12 +6,15 @@ class Todo extends Component {
         super(props);
         this.state = {
             task: '',
-            list: []
+            list: [],
+            taskEnd: [],
+            status: "all"
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleRemove = this.handleRemove.bind(this);
         this.filterItem = this.filterItem.bind(this);
+        this.displayList = this.displayList.bind(this);
     }
     handleChange(event) {
         this.setState({
@@ -24,7 +28,7 @@ class Todo extends Component {
         const tasks = {
             id: Date.now(),
             task: this.state.task,
-            completed: false
+            status: "running"
         }
         list.push(tasks);
         this.setState({
@@ -34,36 +38,47 @@ class Todo extends Component {
         console.log(tasks);
     }
     handleRemove(el) {
-        const task = [...this.state.list];
-        let findTask = task.find(e => e.id === el.id);
-        let updateTask = task.map(e => e.id === el.id ? { ...findTask, completed: true } : e);
-        updateTask = task.filter(e => e.id !== el.id);
+        let task = [...this.state.list];
+        let updateTask = task.map(e => e.id === el.id ? { ...e, status: "completed" } : e);
+        let taskEnd = [...this.state.taskEnd];
+        taskEnd = [...taskEnd, { ...el, status: "completed" }];
+        updateTask = updateTask.filter(e => e.id !== el.id)
         this.setState({
-            list: updateTask
+            list: updateTask,
+            taskEnd
         })
-        console.log(updateTask);
+        console.log(el);
+        console.log(taskEnd);
     }
-    filterItem(value) {
-        console.log(value);
-        switch (value) {
-            case "true":
-                let taskEnd = true;
-                const task = [...this.state.list];
-                let updateTask = task.filter(e => e.completed === taskEnd);
-                this.setState({
-                    task: updateTask
-                })
-                break;
-            case "false":
-                let taskStatus = false;
-                let updateTasks = task.filter(e => e.completed === taskStatus);
-                this.setState({
-                    task: updateTasks
-                })
-                break;
-            default:
-                break;
+    filterItem(e) {
+        if (e.target.checked) {
+            this.setState({
+                status: e.target.value
+            })
+            console.log(this.state.status);
         }
+    }
+    displayList() {
+        const status = this.state.status;
+        const taskEnd = this.state.taskEnd.map(el => (
+            <div className="TaskList" key={el.id}>
+                {el.task}
+                <button className="Clear" onClick={() => this.handleRemove(el)}> X </button>
+            </div>
+        ))
+        const taskList = this.state.list.map((el) => (
+            <div className="TaskList" key={el.id}>
+                {el.task}
+                <button className="Clear" onClick={() => this.handleRemove(el)}> X </button>
+            </div>
+        ))
+        return (
+            <div>
+                {
+                    status === "completed" ? taskEnd : taskList
+                }
+            </div>
+        )
     }
     render(props) {
         return (
@@ -75,28 +90,33 @@ class Todo extends Component {
                         <input type="text" value={this.state.task} name="task" placeholder="Enter a Task to Do" onChange={e => this.handleChange(e)} required />
                         <button value="submit" className="Submit"> Submit </button>
                     </form>
-                    {
-                        this.state.list.map((el) => (
-                            <div className="TaskList" key={el.id}>
-                                {el.task}
-                                <button className="Clear" onClick={() => this.handleRemove(el)}> X </button>
-                            </div>
-                        ))
-                    }
                     {/* Switch Over Various Actions Input */}
                     <div>
 
-                        <input type="checkbox" value="all" name="task" className="Checkbox" onChange={(event) => this.filterItem(event.target.value)} />
+                        <input type="checkbox" value="all" name="task" className="Checkbox" onChange={(event) => this.filterItem(event)} />
                         <label htmlFor="All Tasks " >All Tasks</label>
 
-                        <input type="checkbox" value="true" name="task" className="Checkbox" onChange={(event) => this.filterItem(event.target.value)} />
+                        <input type="checkbox" value="completed" name="task" className="Checkbox" onChange={(event) => this.filterItem(event)} />
                         <label htmlFor="Completed " >Completed</label>
 
-                        <input type="checkbox" value="false" name="task" className="Checkbox" onChange={(event) => this.filterItem(event.target.value)} />
+                        <input type="checkbox" value="running" name="task" className="Checkbox" onChange={(event) => this.filterItem(event)} />
                         <label htmlFor="Running Task " >Running Task</label>
 
                     </div>
                 </div>
+                {
+                    this.state.status === "completed" ?
+                        this.state.taskEnd.length > 0 ? <h1>You have completed {this.state.list.length} tasks</h1> : <h1>Complete Some Tasks</h1>
+                        : this.state.list.length > 0 ? <h1>You have {this.state.list.length} tasks to do</h1> : <h1>Add Some Tasks to do</h1>
+
+
+                }
+                <div className="ToDoList">
+                    {
+                        this.displayList()
+                    }
+                </div>
+
             </div>
         )
     }
