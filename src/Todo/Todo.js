@@ -15,6 +15,7 @@ class Todo extends Component {
         this.handleRemove = this.handleRemove.bind(this);
         this.filterItem = this.filterItem.bind(this);
         this.displayList = this.displayList.bind(this);
+        this.changeStatus = this.changeStatus.bind(this);
     }
     handleChange(event) {
         this.setState({
@@ -47,8 +48,17 @@ class Todo extends Component {
             list: updateTask,
             taskEnd
         })
+    }
+    changeStatus(el) {
         console.log(el);
-        console.log(taskEnd);
+        let task = [...this.state.list];
+        task.push({ ...el, status: "running" });
+        let taskEnd = this.state.taskEnd.filter(e => e.id !== el.id);
+        console.log(task);
+        this.setState({
+            list: task,
+            taskEnd
+        })
     }
     filterItem(e) {
         if (e.target.checked) {
@@ -63,7 +73,7 @@ class Todo extends Component {
         const taskEnd = this.state.taskEnd.map(el => (
             <div className="TaskList" key={el.id}>
                 {el.task}
-                <button className="Clear" onClick={() => this.handleRemove(el)}> X </button>
+                <button className="Clear" onClick={() => this.changeStatus(el)}> X </button>
             </div>
         ))
         const taskList = this.state.list.map((el) => (
@@ -124,3 +134,5 @@ class Todo extends Component {
 
 
 export default Todo;
+
+
